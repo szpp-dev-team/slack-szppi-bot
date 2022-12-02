@@ -20,7 +20,9 @@ func MakeUrl(x int, R string) string {
 	} else {
 		min = 0
 	}
-	ran := fmt.Sprintf("%d", rand.Intn(max-min)+min)
+	var tmp int = rand.Intn(max-min)+min
+	ran := fmt.Sprintf("%d", tmp)
+	if tmp<100 {ran = "0"+ ran}
 	//ran := string(rand.Intn(max-min) + min)
 	url := "https://atcoder.jp/contests/abc" + ran + "/tasks/abc" + ran + "_" + R
 	//https://atcoder.jp/contests/abc258/tasks/abc258_b
