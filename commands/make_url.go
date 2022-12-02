@@ -13,9 +13,9 @@ func MakeUrl(x int, R string) string {
 	rand.Seed(seed.Int64())
 	max := x
 	var min int
-	if R == "E" || R == "F" {
+	if R == "e" || R == "f" {
 		min = 126
-	} else if R == "G" || R == "H" || R == "EX" {
+	} else if R == "g" || R == "h" {
 		min = 212
 	} else {
 		min = 0
