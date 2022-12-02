@@ -25,16 +25,15 @@ func max(a int, b int) int {
 	}
 }
 
-func id() {
+func id() int {
 	var posts []Post
 
 	resp, _ := http.Get("https://kenkoooo.com/atcoder/resources/contests.json")
 
-
 	body, _ := io.ReadAll(resp.Body)
 
 	json.Unmarshal(body, &posts)
- 	res := 1
+	res := 1
 	for idx := range posts {
 		post_id := posts[idx].ID
 		if strings.Count(post_id, "abc") > 0 {
@@ -45,4 +44,5 @@ func id() {
 	fmt.Println(res)
 
 	defer resp.Body.Close()
+	return res
 }
