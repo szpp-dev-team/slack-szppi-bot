@@ -15,10 +15,15 @@ func MakeUrl(x int, R string) string {
 	var min int
 	if R == "e" || R == "f" {
 		min = 126
-	} else if R == "g" || R == "h" {
+	} else if R == "g" || R == "h" || R == "ex" {
+		if R == "ex" {
+			R = "h"
+		}
 		min = 212
-	} else {
+	} else if R == "a" || R == "b" || R == "c" || R == "d" {
 		min = 0
+	} else {
+		return "そ、そんな問題は用意できないっぴ、、、"
 	}
 	var tmp int = rand.Intn(max-min) + min
 	ran := fmt.Sprintf("%d", tmp)
