@@ -1,4 +1,4 @@
-package commands
+package ABC
 
 import (
 	"encoding/json"
@@ -25,7 +25,7 @@ func max(a int, b int) int {
 	}
 }
 
-func id() int {
+func Id() int {
 	var posts []Post
 
 	resp, _ := http.Get("https://kenkoooo.com/atcoder/resources/contests.json")

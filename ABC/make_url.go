@@ -1,4 +1,4 @@
-package commands
+package ABC
 
 import (
 	crand "crypto/rand"

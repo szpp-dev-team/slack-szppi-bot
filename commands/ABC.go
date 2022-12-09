@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/slack-go/slack"
+	"github.com/szpp-dev-team/szpp-slack-bot/ABC"
 )
 
 type SubHandlerABC struct {
@@ -20,7 +21,7 @@ func (o *SubHandlerABC) Name() string {
 
 func (o *SubHandlerABC) Handle(slashCmd *slack.SlashCommand) error {
 
-	res := MakeUrl(id(), strings.Fields(slashCmd.Text)[1])
+	res := ABC.MakeUrl(ABC.Id(), strings.Fields(slashCmd.Text)[1])
 
 	_, _, _, err := o.c.SendMessage(slashCmd.ChannelID, slack.MsgOptionText(res, false))
 
