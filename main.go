@@ -32,6 +32,7 @@ func main() {
 	slashHandler.RegisterSubHandlers(
 		commands.NewSubHandlerOmikuji(client),
 		commands.NewSubHandlerImage(client, customsearchService),
+		commands.NewSubHandlerEmoji(client),
 	)
 
 	http.HandleFunc("/slack/events", func(w http.ResponseWriter, r *http.Request) {
