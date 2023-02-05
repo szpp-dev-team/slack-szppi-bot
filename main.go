@@ -34,7 +34,7 @@ func main() {
 		commands.NewSubHandlerImage(client, customsearchService),
 	)
 
-	http.HandleFunc("/slack/events", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/slack/slash_commands", func(w http.ResponseWriter, r *http.Request) {
 		verifier, err := slack.NewSecretsVerifier(r.Header, signingSecret)
 		if err != nil {
 			log.Println("failed to verify secrets:", err)
