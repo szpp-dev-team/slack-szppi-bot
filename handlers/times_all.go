@@ -47,7 +47,7 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, b []byte) {
 	if _, _, err := h.c.PostMessage(
 		TimesAllChannelID,
 		slack.MsgOptionText(messageEvent.Text, false),
-		slack.MsgOptionUsername(user.Name),
+		slack.MsgOptionUsername(user.Profile.DisplayName),
 		slack.MsgOptionIconURL(user.Profile.Image192),
 	); err != nil {
 		log.Println(err)
