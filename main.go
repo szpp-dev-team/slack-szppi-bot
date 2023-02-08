@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -9,7 +10,9 @@ import (
 	"os"
 
 	"github.com/slack-go/slack"
+	"github.com/slack-go/slack/slackevents"
 	"github.com/szpp-dev-team/szpp-slack-bot/commands"
+	"github.com/szpp-dev-team/szpp-slack-bot/handlers"
 	"google.golang.org/api/customsearch/v1"
 	"google.golang.org/api/option"
 )
@@ -34,8 +37,9 @@ func main() {
 		commands.NewSubHandlerImage(client, customsearchService),
 		commands.NewSubHandlerEmoji(client),
 	)
+	timesAllHandler := handlers.NewHandlerTimesAll(client)
 
-	http.HandleFunc("/slack/events", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/slack/slash_commands", func(w http.ResponseWriter, r *http.Request) {
 		verifier, err := slack.NewSecretsVerifier(r.Header, signingSecret)
 		if err != nil {
 			log.Println("failed to verify secrets:", err)
@@ -58,6 +62,39 @@ func main() {
 		}
 
 		slashHandler.Handle(w, &slashCmd)
+	})
+
+	http.HandleFunc("/slack/events", func(w http.ResponseWriter, r *http.Request) {
+		b, _ := io.ReadAll(r.Body)
+		verifier, err := slack.NewSecretsVerifier(r.Header, signingSecret)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		if _, err := verifier.Write(b); err != nil {
+			log.Println(err)
+			return
+		}
+		if err := verifier.Ensure(); err != nil {
+			log.Println(err)
+			return
+		}
+
+		eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(b), slackevents.OptionNoVerifyToken())
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		switch eventsAPIEvent.Type {
+		case slackevents.URLVerification:
+			var chalResp slackevents.ChallengeResponse
+			_ = json.Unmarshal(b, &chalResp)
+			_, _ = w.Write([]byte(chalResp.Challenge))
+			return
+		default:
+			timesAllHandler.Handle(w, b)
+		}
 	})
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%v", port), nil); err != nil {
