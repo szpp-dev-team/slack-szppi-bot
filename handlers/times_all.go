@@ -45,6 +45,7 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 		slack.MsgOptionText(messageEvent.Text, false),
 		slack.MsgOptionUsername(user.Profile.DisplayName),
 		slack.MsgOptionIconURL(user.Profile.Image192),
+		slack.MsgOptionAttachments(messageEvent.Attachments...),
 	); err != nil {
 		log.Println(err)
 		return
