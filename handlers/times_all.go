@@ -26,6 +26,9 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 	if messageEvent == nil {
 		return
 	}
+	if isReplyMessage(messageEvent) {
+		return
+	}
 	log.Println(messageEvent)
 	user, err := h.c.GetUserInfo(messageEvent.User)
 	if err != nil {
@@ -46,4 +49,8 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 		log.Println(err)
 		return
 	}
+}
+
+func isReplyMessage(messageEvent *slackevents.MessageEvent) bool {
+	return messageEvent.ThreadTimeStamp != ""
 }
