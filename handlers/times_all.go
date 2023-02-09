@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 
@@ -19,13 +18,7 @@ func NewHandlerTimesAll(c *slack.Client) *HandlerTimesAll {
 	return &HandlerTimesAll{c}
 }
 
-func (h *HandlerTimesAll) Handle(w http.ResponseWriter, b []byte) {
-	eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(b), slackevents.OptionNoVerifyToken())
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackevents.EventsAPIEvent) {
 	if eventsAPIEvent.Type != slackevents.CallbackEvent {
 		return
 	}
