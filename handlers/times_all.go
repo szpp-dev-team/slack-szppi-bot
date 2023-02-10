@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 
@@ -20,13 +19,7 @@ func NewHandlerTimesAll(c *slack.Client) *HandlerTimesAll {
 	return &HandlerTimesAll{c}
 }
 
-func (h *HandlerTimesAll) Handle(w http.ResponseWriter, b []byte) {
-	eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(b), slackevents.OptionNoVerifyToken())
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackevents.EventsAPIEvent) {
 	if eventsAPIEvent.Type != slackevents.CallbackEvent {
 		return
 	}
@@ -36,26 +29,33 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, b []byte) {
 	}
 	if eventsAPIEvent.Type == string(slackevents.ReactionAdded) {
 		reaction := eventsAPIEvent.InnerEvent.Data.(*slackevents.ReactionAddedEvent)
-		h.reflectedReaction(reaction.ItemUser, reaction.Item.Message.Timestamp)
 		return
 	}
 
-	log.Println(messageEvent)
-	user, err := h.c.GetUserInfo(messageEvent.User)
-	if err != nil {
+	if isReplyMessage(messageEvent) {
+		return
+		log.Println(messageEvent)
+		user, err := h.c.GetUserInfo(messageEvent.User)
 		log.Println(err)
 		return
 	}
-	// message を送ったのが bot もしくは message の場所が #times_all なら無視
-	if user.IsBot || messageEvent.Channel == TimesAllChannelID {
+	if messageEvent.Channel == TimesAllChannelID {
 		return
 	}
-	log.Println(user.Name, user.Profile.Image192)
-	if _, _, err := h.c.PostMessage(
-		TimesAllChannelID,
-		slack.MsgOptionText(messageEvent.Text, false),
+	msgOptList := []slack.MsgOption{
 		slack.MsgOptionUsername(user.Profile.DisplayName),
 		slack.MsgOptionIconURL(user.Profile.Image192),
+		slack.MsgOptionAttachments(messageEvent.Attachments...),
+	}
+	// bot による message の場合は text は投稿しない
+	// NOTE: 今後「おもしろメッセージ bot」みたいのが出てきた時にどうするか考える必要がある
+	if !user.IsBot {
+		msgOptList = append(msgOptList, slack.MsgOptionText(messageEvent.Text, false))
+	}
+
+	if _, _, err := h.c.PostMessage(
+		TimesAllChannelID,
+		msgOptList...,
 	); err != nil {
 		log.Println(err)
 		return
@@ -87,4 +87,8 @@ func (h *HandlerTimesAll) reflectedReaction(user string, timeStamp string) {
 			log.Println(message.Text)
 		}
 	}
+}
+
+func isReplyMessage(messageEvent *slackevents.MessageEvent) bool {
+	return messageEvent.ThreadTimeStamp != ""
 }

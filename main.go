@@ -93,7 +93,7 @@ func main() {
 			_, _ = w.Write([]byte(chalResp.Challenge))
 			return
 		default:
-			timesAllHandler.Handle(w, b)
+			timesAllHandler.Handle(w, &eventsAPIEvent)
 		}
 	})
 
