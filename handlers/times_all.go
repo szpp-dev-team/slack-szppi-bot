@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -33,6 +34,12 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, b []byte) {
 	if messageEvent == nil {
 		return
 	}
+	if eventsAPIEvent.Type == string(slackevents.ReactionAdded) {
+		reaction := eventsAPIEvent.InnerEvent.Data.(*slackevents.ReactionAddedEvent)
+		h.reflectedReaction(reaction.ItemUser, reaction.Item.Message.Timestamp)
+		return
+	}
+
 	log.Println(messageEvent)
 	user, err := h.c.GetUserInfo(messageEvent.User)
 	if err != nil {
@@ -52,5 +59,32 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, b []byte) {
 	); err != nil {
 		log.Println(err)
 		return
+	}
+}
+
+func (h *HandlerTimesAll) reflectedReaction(user string, timeStamp string) {
+	channelID := ""
+	channels, _, err := h.c.GetConversations(&slack.GetConversationsParameters{
+		Types: []string{"public"},
+	})
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.Println(user)
+
+	for _, channel := range channels {
+		log.Println(channel.User)
+		if channel.User == user {
+			channelID = channel.ID
+		}
+	}
+	history, err := h.c.GetConversationHistoryContext(context.Background(), &slack.GetConversationHistoryParameters{
+		ChannelID: channelID,
+	})
+	for _, message := range history.Messages {
+		if message.Timestamp == timeStamp {
+			log.Println(message.Text)
+		}
 	}
 }
