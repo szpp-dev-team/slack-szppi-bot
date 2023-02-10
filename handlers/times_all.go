@@ -29,16 +29,16 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 	}
 	if eventsAPIEvent.Type == string(slackevents.ReactionAdded) {
 		reaction := eventsAPIEvent.InnerEvent.Data.(*slackevents.ReactionAddedEvent)
+		h.reflectedReaction(reaction.User, reaction.Item.Message.Timestamp)
 		return
 	}
-
 	if isReplyMessage(messageEvent) {
 		return
-		log.Println(messageEvent)
-		user, err := h.c.GetUserInfo(messageEvent.User)
-		log.Println(err)
-		return
 	}
+	log.Println(messageEvent)
+	user, err := h.c.GetUserInfo(messageEvent.User)
+	log.Println(err)
+	return
 	if messageEvent.Channel == TimesAllChannelID {
 		return
 	}
