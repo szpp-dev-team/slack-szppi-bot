@@ -27,6 +27,7 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 	if messageEvent == nil {
 		return
 	}
+	log.Println(eventsAPIEvent.Type)
 	if eventsAPIEvent.Type == string(slackevents.ReactionAdded) {
 		reaction := eventsAPIEvent.InnerEvent.Data.(*slackevents.ReactionAddedEvent)
 		h.reflectedReaction(reaction.User, reaction.Item.Message.Timestamp)
