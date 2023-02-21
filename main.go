@@ -65,7 +65,6 @@ func main() {
 	})
 
 	http.HandleFunc("/slack/events", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("events")
 		b, _ := io.ReadAll(r.Body)
 		verifier, err := slack.NewSecretsVerifier(r.Header, signingSecret)
 		if err != nil {

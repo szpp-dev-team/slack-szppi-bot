@@ -23,16 +23,21 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 	if eventsAPIEvent.Type != slackevents.CallbackEvent {
 		return
 	}
+
+	innerEvent := eventsAPIEvent.InnerEvent
+	switch ev := innerEvent.Data.(type) {
+	case *slackevents.ReactionAddedEvent:
+		h.reflectedReaction(ev.User, ev.Item.Message.Timestamp)
+		return
+	// 今後eventを拡張する際には、この下にどんどん書いてく？
+	// 今回はreactionEventだけを試しに書いたけど、ここのcaseでmessageEventも書いたほうがいいかな？(うまく動けば)
+	}
+
 	messageEvent := eventsAPIEvent.InnerEvent.Data.(*slackevents.MessageEvent)
 	if messageEvent == nil {
 		return
 	}
 	log.Println(eventsAPIEvent.Type)
-	if eventsAPIEvent.Type == string(slackevents.ReactionAdded) {
-		reaction := eventsAPIEvent.InnerEvent.Data.(*slackevents.ReactionAddedEvent)
-		h.reflectedReaction(reaction.User, reaction.Item.Message.Timestamp)
-		return
-	}
 	if isReplyMessage(messageEvent) {
 		return
 	}
