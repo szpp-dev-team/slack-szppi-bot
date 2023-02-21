@@ -79,6 +79,7 @@ func (h *HandlerTimesAll) reflectedReaction(user string, timeStamp string) {
 		log.Println(err)
 		return
 	}
+	log.Println("errではないのか")
 	log.Println(user, channels)
 
 	// for _, channel := range channels {
