@@ -72,7 +72,7 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 }
 
 func (h *HandlerTimesAll) reflectedReaction(user string, timeStamp string) {
-	channelID := ""
+	//channelID := ""
 	channels, _, err := h.c.GetConversations(&slack.GetConversationsParameters{
 		Types: []string{"public"},
 	})
@@ -80,22 +80,22 @@ func (h *HandlerTimesAll) reflectedReaction(user string, timeStamp string) {
 		log.Println(err)
 		return
 	}
-	log.Println(user)
+	log.Println(user,channels)
 
-	for _, channel := range channels {
-		log.Println(channel.User)
-		if channel.User == user {
-			channelID = channel.ID
-		}
-	}
-	history, err := h.c.GetConversationHistoryContext(context.Background(), &slack.GetConversationHistoryParameters{
-		ChannelID: channelID,
-	})
-	for _, message := range history.Messages {
-		if message.Timestamp == timeStamp {
-			log.Println(message.Text)
-		}
-	}
+	// for _, channel := range channels {
+	// 	log.Println(channel.User)
+	// 	if channel.User == user {
+	// 		channelID = channel.ID
+	// 	}
+	// }
+	// history, err := h.c.GetConversationHistoryContext(context.Background(), &slack.GetConversationHistoryParameters{
+	// 	ChannelID: channelID,
+	// })
+	// for _, message := range history.Messages {
+	// 	if message.Timestamp == timeStamp {
+	// 		log.Println(message.Text)
+	// 	}
+	// }
 }
 
 func isReplyMessage(messageEvent *slackevents.MessageEvent) bool {
