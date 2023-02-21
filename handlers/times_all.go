@@ -73,6 +73,7 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 
 func (h *HandlerTimesAll) reflectedReaction(user string, timeStamp string) {
 	//channelID := ""
+	log.Println("GetConvesationsが動いてないんか？")
 	channels, _, err := h.c.GetConversations(&slack.GetConversationsParameters{})
 	if err != nil {
 		log.Println("ここにおるんか？")
