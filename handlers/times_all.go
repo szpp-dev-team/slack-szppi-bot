@@ -26,7 +26,7 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 	innerEvent := eventsAPIEvent.InnerEvent
 	switch ev := innerEvent.Data.(type) {
 	case *slackevents.ReactionAddedEvent:
-		log.Println("reaction add")
+		log.Println("reaction add", ev.User, ev.Reaction, ev.ItemUser)
 		h.reflectedReaction(ev.User, ev.Item.Message.Timestamp)
 		return
 		// 今後eventを拡張する際には、この下にどんどん書いてく？
@@ -72,9 +72,7 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 
 func (h *HandlerTimesAll) reflectedReaction(user string, timeStamp string) {
 	//channelID := ""
-	channels, _, err := h.c.GetConversations(&slack.GetConversationsParameters{
-		Types: []string{"public_channel"},
-	})
+	channels, _, err := h.c.GetConversations(&slack.GetConversationsParameters{})
 	if err != nil {
 		log.Println(err)
 		return
