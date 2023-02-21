@@ -75,6 +75,7 @@ func (h *HandlerTimesAll) reflectedReaction(user string, timeStamp string) {
 	//channelID := ""
 	channels, _, err := h.c.GetConversations(&slack.GetConversationsParameters{})
 	if err != nil {
+		log.Println("ここにおるんか？")
 		log.Println(err)
 		return
 	}
