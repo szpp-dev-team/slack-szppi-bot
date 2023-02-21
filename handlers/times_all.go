@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"log"
 	"net/http"
 
@@ -80,7 +79,7 @@ func (h *HandlerTimesAll) reflectedReaction(user string, timeStamp string) {
 		log.Println(err)
 		return
 	}
-	log.Println(user,channels)
+	log.Println(user, channels)
 
 	// for _, channel := range channels {
 	// 	log.Println(channel.User)
