@@ -26,7 +26,8 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 	innerEvent := eventsAPIEvent.InnerEvent
 	switch ev := innerEvent.Data.(type) {
 	case *slackevents.ReactionAddedEvent:
-		log.Println("reaction add", ev.User, ev.Reaction, ev.ItemUser)
+		name, _ := h.c.GetUserInfo(ev.User)
+		log.Println("reaction add", ev.User, name.Name, ev.Reaction, ev.ItemUser)
 		h.reflectedReaction(ev.User, ev.Item.Message.Timestamp)
 		return
 		// 今後eventを拡張する際には、この下にどんどん書いてく？
