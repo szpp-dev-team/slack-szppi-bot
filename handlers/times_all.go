@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"log"
 	"net/http"
 
@@ -28,8 +29,8 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 	case *slackevents.ReactionAddedEvent:
 		name, _ := h.c.GetUserInfo(ev.User)
 		log.Println("reaction add")
-		log.Printf("%#v",ev)
-		h.reflectedReaction(name.Name, ev.Item.Message.Timestamp)
+		log.Printf("%#v", ev)
+		h.reflectedReaction(name.Name, ev.Item.Timestamp)
 		return
 		// 今後eventを拡張する際には、この下にどんどん書いてく？
 		// 今回はreactionEventだけを試しに書いたけど、ここのcaseでmessageEventも書いたほうがいいかな？(うまく動けば)
@@ -73,31 +74,29 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 }
 
 func (h *HandlerTimesAll) reflectedReaction(user string, timeStamp string) {
-	//channelID := ""
-	log.Println("GetConvesationsが動いてないんか？")
+	channelID := ""
 	channels, _, err := h.c.GetConversations(&slack.GetConversationsParameters{})
 	if err != nil {
-		log.Println("ここにおるんか？")
 		log.Println(err)
 		return
 	}
-	log.Println("errではないのか")
 	log.Println(user, channels)
 
-	// for _, channel := range channels {
-	// 	log.Println(channel.User)
-	// 	if channel.User == user {
-	// 		channelID = channel.ID
-	// 	}
-	// }
-	// history, err := h.c.GetConversationHistoryContext(context.Background(), &slack.GetConversationHistoryParameters{
-	// 	ChannelID: channelID,
-	// })
-	// for _, message := range history.Messages {
-	// 	if message.Timestamp == timeStamp {
-	// 		log.Println(message.Text)
-	// 	}
-	// }
+	for _, channel := range channels {
+		log.Println(channel.User)
+		if channel.User == user {
+			channelID = channel.ID
+		}
+	}
+	history, err := h.c.GetConversationHistoryContext(context.Background(), &slack.GetConversationHistoryParameters{
+		ChannelID: channelID,
+		Limit: 100,
+	})
+	for _, message := range history.Messages {
+		if message.Timestamp == timeStamp {
+			log.Println(message.Text)
+		}
+	}
 }
 
 func isReplyMessage(messageEvent *slackevents.MessageEvent) bool {
