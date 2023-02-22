@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"regexp"
@@ -74,7 +75,7 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 }
 
 func (h *HandlerTimesAll) reflectedReaction(user string, timeStamp string) {
-	//channelID := ""
+	channelID := ""
 	channels, _, err := h.c.GetConversations(&slack.GetConversationsParameters{})
 	if err != nil {
 		log.Println(err)
@@ -83,20 +84,20 @@ func (h *HandlerTimesAll) reflectedReaction(user string, timeStamp string) {
 	log.Println(user, channels)
 
 	for _, channel := range channels {
-		log.Println(channel.Name, regexp.MustCompile("times_").MatchString(channel.Name))
-		if channel.User == user {
-			//channelID = channel.ID
+		//log.Println(channel.Name, regexp.MustCompile("times_").MatchString(channel.Name))
+		if regexp.MustCompile("times_").MatchString(channel.Name) && channel.Name[7:] == user {
+			channelID = channel.ID
 		}
 	}
-	// history, err := h.c.GetConversationHistoryContext(context.Background(), &slack.GetConversationHistoryParameters{
-	// 	ChannelID: channelID,
-	// 	Limit: 100,
-	// })
-	// for _, message := range history.Messages {
-	// 	if message.Timestamp == timeStamp {
-	// 		log.Println(message.Text)
-	// 	}
-	// }
+	history, err := h.c.GetConversationHistoryContext(context.Background(), &slack.GetConversationHistoryParameters{
+		ChannelID: channelID,
+		Limit:     100,
+	})
+	for _, message := range history.Messages {
+		if message.Timestamp == timeStamp {
+			log.Println(message.Text)
+		}
+	}
 }
 
 func isReplyMessage(messageEvent *slackevents.MessageEvent) bool {
