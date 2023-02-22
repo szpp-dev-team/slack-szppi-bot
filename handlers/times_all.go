@@ -81,12 +81,12 @@ func (h *HandlerTimesAll) reflectedReaction(user string, timeStamp string) {
 		log.Println(err)
 		return
 	}
-	log.Println(user, channels)
 
 	for _, channel := range channels {
 		//log.Println(channel.Name, regexp.MustCompile("times_").MatchString(channel.Name))
 		if regexp.MustCompile("times_").MatchString(channel.Name) && channel.Name[7:] == user {
 			channelID = channel.ID
+			log.Println(channelID)
 		}
 	}
 	history, err := h.c.GetConversationHistoryContext(context.Background(), &slack.GetConversationHistoryParameters{
