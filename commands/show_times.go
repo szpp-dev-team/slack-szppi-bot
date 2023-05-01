@@ -41,8 +41,10 @@ func (o *CommandShowTimes) Handle(slashCmd *slack.SlashCommand) error {
 
 	textBuilder := &strings.Builder{}
 	for _, channel := range channels {
-		if _, err := textBuilder.WriteString(fmt.Sprintf("<#%s>\n", channel.ID)); err != nil {
-			return err
+		if strings.HasPrefix(channel.Name, "巛") || strings.HasPrefix(channel.Name, "times") {
+			if _, err := textBuilder.WriteString(fmt.Sprintf("<#%s>\n", channel.ID)); err != nil {
+				return err
+			}
 		}
 	}
 
