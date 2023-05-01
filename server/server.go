@@ -20,6 +20,7 @@ func New(slackClient *slack.Client, customsearchService *customsearch.Service, s
 		commands.NewSubHandlerImage(slackClient, customsearchService),
 	)
 	timesAllHandler := handlers.NewHandlerTimesAll(slackClient)
+	channelNotificatorHandler := handlers.NewHandlerNewChannelNotificator(slackClient)
 
 	e := echo.New()
 	e.Use(middleware.Verify(signingSecret), echomiddleware.Logger())
@@ -41,11 +42,14 @@ func New(slackClient *slack.Client, customsearchService *customsearch.Service, s
 		if eventsAPIEvent.Type != slackevents.CallbackEvent {
 			return echo.NewHTTPError(http.StatusBadRequest)
 		}
-		messageEvent := eventsAPIEvent.InnerEvent.Data.(*slackevents.MessageEvent)
-		if messageEvent == nil {
-			return echo.NewHTTPError(http.StatusBadRequest)
+		switch ty := eventsAPIEvent.InnerEvent.Data.(type) {
+		case *slackevents.MessageEvent:
+			return timesAllHandler.Handle(c, ty)
+		case *slackevents.ChannelCreatedEvent:
+			return channelNotificatorHandler.Handle(ty)
 		}
-		return timesAllHandler.Handle(c, messageEvent)
+
+		return echo.NewHTTPError(http.StatusBadRequest)
 	}, middleware.URLVerification())
 
 	return e
