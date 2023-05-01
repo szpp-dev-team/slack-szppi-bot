@@ -27,7 +27,9 @@ func (s *SlashCommandHandler) Handle(c echo.Context, slashCmd *slack.SlashComman
 	rw := c.Response().Writer
 
 	tokens := strings.Fields(slashCmd.Text)
-	// TODO: show help if the length of tokens is 0
+	if len(tokens) == 0 {
+		return nil
+	}
 
 	handle, ok := s.cmdByName[tokens[0]]
 	if !ok {
@@ -37,6 +39,7 @@ func (s *SlashCommandHandler) Handle(c echo.Context, slashCmd *slack.SlashComman
 	rw.Header().Add("Content-Type", "application/json")
 	msg := &slack.Msg{ResponseType: slack.ResponseTypeInChannel} // 打ったコマンドを表示させる
 	if err := json.NewEncoder(rw).Encode(msg); err != nil {
+		log.Println(err)
 		return echo.NewHTTPError(http.StatusNotFound, err)
 	}
 

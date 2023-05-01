@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	echomiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 	"github.com/szpp-dev-team/szpp-slack-bot/commands"
@@ -21,7 +22,7 @@ func New(slackClient *slack.Client, customsearchService *customsearch.Service, s
 	timesAllHandler := handlers.NewHandlerTimesAll(slackClient)
 
 	e := echo.New()
-	e.Use(middleware.Verify(signingSecret))
+	e.Use(middleware.Verify(signingSecret), echomiddleware.Logger())
 
 	e.POST("/slack/slash_commands", func(c echo.Context) error {
 		slashCmd, err := slack.SlashCommandParse(c.Request())
@@ -29,6 +30,7 @@ func New(slackClient *slack.Client, customsearchService *customsearch.Service, s
 			log.Println("failed to parse slash command:", err)
 			return err
 		}
+
 		return slashHandler.Handle(c, &slashCmd)
 	})
 	e.POST("/slack/events", func(c echo.Context) error {

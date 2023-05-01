@@ -32,6 +32,7 @@ func URLVerification() echo.MiddlewareFunc {
 				}
 				return json.NewEncoder(rw).Encode(chalResp)
 			default:
+				c.Request().Body = io.NopCloser(bytes.NewReader(b))
 				c.Set("events_api_event", &eventsAPIEvent)
 				return next(c)
 			}
