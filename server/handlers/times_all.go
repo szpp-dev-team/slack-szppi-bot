@@ -1,14 +1,14 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
 
-const TimesAllChannelID = "C04MX77LHQE"
+const timesAllChannelID = "C04MX77LHQE"
 
 type HandlerTimesAll struct {
 	c *slack.Client
@@ -18,25 +18,16 @@ func NewHandlerTimesAll(c *slack.Client) *HandlerTimesAll {
 	return &HandlerTimesAll{c}
 }
 
-func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackevents.EventsAPIEvent) {
-	if eventsAPIEvent.Type != slackevents.CallbackEvent {
-		return
-	}
-	messageEvent := eventsAPIEvent.InnerEvent.Data.(*slackevents.MessageEvent)
-	if messageEvent == nil {
-		return
-	}
+func (h *HandlerTimesAll) Handle(c echo.Context, messageEvent *slackevents.MessageEvent) error {
 	if isReplyMessage(messageEvent) {
-		return
+		return nil
 	}
-	log.Println(messageEvent)
 	user, err := h.c.GetUserInfo(messageEvent.User)
 	if err != nil {
-		log.Println(err)
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	if messageEvent.Channel == TimesAllChannelID {
-		return
+	if messageEvent.Channel == timesAllChannelID {
+		return nil // skip messages in times_all
 	}
 	msgOptList := []slack.MsgOption{
 		slack.MsgOptionUsername(user.Profile.DisplayName),
@@ -49,13 +40,10 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 		msgOptList = append(msgOptList, slack.MsgOptionText(messageEvent.Text, false))
 	}
 
-	if _, _, err := h.c.PostMessage(
-		TimesAllChannelID,
-		msgOptList...,
-	); err != nil {
-		log.Println(err)
-		return
+	if _, _, err := h.c.PostMessage(timesAllChannelID, msgOptList...); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+	return nil
 }
 
 func isReplyMessage(messageEvent *slackevents.MessageEvent) bool {
