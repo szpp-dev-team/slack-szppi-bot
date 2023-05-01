@@ -1,6 +1,6 @@
 module github.com/szpp-dev-team/szpp-slack-bot
 
-go 1.19
+go 1.20
 
 require (
 	github.com/labstack/echo/v4 v4.10.2
