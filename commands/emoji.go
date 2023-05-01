@@ -7,19 +7,19 @@ import (
 	"github.com/slack-go/slack"
 )
 
-type SubHandlerEmoji struct {
+type CommandEmoji struct {
 	c *slack.Client
 }
 
-func NewSubHandlerEmoji(c *slack.Client) *SubHandlerEmoji {
-	return &SubHandlerEmoji{c}
+func NewCommandEmoji(c *slack.Client) *CommandEmoji {
+	return &CommandEmoji{c}
 }
 
-func (o *SubHandlerEmoji) Name() string {
+func (o *CommandEmoji) Name() string {
 	return "emoji"
 }
 
-func (o *SubHandlerEmoji) Handle(slashCmd *slack.SlashCommand) error {
+func (o *CommandEmoji) Handle(slashCmd *slack.SlashCommand) error {
 	tokens := strings.Fields(slashCmd.Text)
 	text := strings.Join(tokens[1:], " ")
 

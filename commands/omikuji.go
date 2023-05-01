@@ -7,19 +7,19 @@ import (
 	"github.com/slack-go/slack"
 )
 
-type SubHandlerOmikuji struct {
+type CommandOmikuji struct {
 	c *slack.Client
 }
 
-func NewSubHandlerOmikuji(c *slack.Client) *SubHandlerOmikuji {
-	return &SubHandlerOmikuji{c}
+func NewCommandOmikuji(c *slack.Client) *CommandOmikuji {
+	return &CommandOmikuji{c}
 }
 
-func (o *SubHandlerOmikuji) Name() string {
+func (o *CommandOmikuji) Name() string {
 	return "omikuji"
 }
 
-func (o *SubHandlerOmikuji) Handle(slashCmd *slack.SlashCommand) error {
+func (o *CommandOmikuji) Handle(slashCmd *slack.SlashCommand) error {
 	rand.Seed(time.Now().UnixMicro())
 	p := rand.Float64()
 

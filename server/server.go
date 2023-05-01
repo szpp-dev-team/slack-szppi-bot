@@ -16,8 +16,8 @@ import (
 
 func New(slackClient *slack.Client, customsearchService *customsearch.Service, signingSecret string) *echo.Echo {
 	slashHandler := handlers.NewSlashCommandHandler(
-		commands.NewSubHandlerOmikuji(slackClient),
-		commands.NewSubHandlerImage(slackClient, customsearchService),
+		commands.NewCommandOmikuji(slackClient),
+		commands.NewCommandImage(slackClient, customsearchService),
 	)
 	timesAllHandler := handlers.NewHandlerTimesAll(slackClient)
 	channelNotificatorHandler := handlers.NewHandlerNewChannelNotificator(slackClient)

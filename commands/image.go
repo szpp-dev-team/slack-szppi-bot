@@ -10,20 +10,20 @@ import (
 	"google.golang.org/api/customsearch/v1"
 )
 
-type SubHandlerImage struct {
+type CommandImage struct {
 	c *slack.Client
 	s *customsearch.Service
 }
 
-func NewSubHandlerImage(c *slack.Client, s *customsearch.Service) *SubHandlerImage {
-	return &SubHandlerImage{c, s}
+func NewCommandImage(c *slack.Client, s *customsearch.Service) *CommandImage {
+	return &CommandImage{c, s}
 }
 
-func (o *SubHandlerImage) Name() string {
+func (o *CommandImage) Name() string {
 	return "image"
 }
 
-func (o *SubHandlerImage) Handle(slashCmd *slack.SlashCommand) error {
+func (o *CommandImage) Handle(slashCmd *slack.SlashCommand) error {
 	q := strings.Join(strings.Fields(slashCmd.Text)[1:], "")
 	log.Println(q)
 	resp, err := o.s.Cse.List().SearchType("image").Cx("83bd9114c4919450d").Q(q).Start(1).Do()
