@@ -1,2 +1,3 @@
-.env*
+.*
+!.envrc.sample
 credentials.json

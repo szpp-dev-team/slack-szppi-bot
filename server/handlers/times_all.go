@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/labstack/echo/v4"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
 
-const TimesAllChannelID = "C04MX77LHQE"
+const timesAllChannelID = "C04MX77LHQE"
 
 type HandlerTimesAll struct {
 	c *slack.Client
@@ -20,39 +21,16 @@ func NewHandlerTimesAll(c *slack.Client) *HandlerTimesAll {
 	return &HandlerTimesAll{c}
 }
 
-func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackevents.EventsAPIEvent) {
-	if eventsAPIEvent.Type != slackevents.CallbackEvent {
-		return
-	}
-
-	innerEvent := eventsAPIEvent.InnerEvent
-	switch ev := innerEvent.Data.(type) {
-	case *slackevents.ReactionAddedEvent:
-		name, _ := h.c.GetUserInfo(ev.User)
-		log.Println("reaction add")
-		log.Printf("%#v", ev)
-		h.reflectedReaction(name.Name, ev.Item.Timestamp)
-		return
-		// 今後eventを拡張する際には、この下にどんどん書いてく？
-		// 今回はreactionEventだけを試しに書いたけど、ここのcaseでmessageEventも書いたほうがいいかな？(うまく動けば)
-	}
-
-	messageEvent := eventsAPIEvent.InnerEvent.Data.(*slackevents.MessageEvent)
-	if messageEvent == nil {
-		return
-	}
-	log.Println(eventsAPIEvent.Type)
+func (h *HandlerTimesAll) Handle(c echo.Context, messageEvent *slackevents.MessageEvent) error {
 	if isReplyMessage(messageEvent) {
-		return
+		return nil
 	}
-	log.Println(messageEvent)
 	user, err := h.c.GetUserInfo(messageEvent.User)
 	if err != nil {
-		log.Println(err)
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	if messageEvent.Channel == TimesAllChannelID {
-		return
+	if messageEvent.Channel == timesAllChannelID {
+		return nil // skip messages in times_all
 	}
 	msgOptList := []slack.MsgOption{
 		slack.MsgOptionUsername(user.Profile.DisplayName),
@@ -65,13 +43,10 @@ func (h *HandlerTimesAll) Handle(w http.ResponseWriter, eventsAPIEvent *slackeve
 		msgOptList = append(msgOptList, slack.MsgOptionText(messageEvent.Text, false))
 	}
 
-	if _, _, err := h.c.PostMessage(
-		TimesAllChannelID,
-		msgOptList...,
-	); err != nil {
-		log.Println(err)
-		return
+	if _, _, err := h.c.PostMessage(timesAllChannelID, msgOptList...); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+	return nil
 }
 
 func (h *HandlerTimesAll) reflectedReaction(user string, timeStamp string) {
