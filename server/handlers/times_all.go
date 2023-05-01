@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/slack-go/slack"
@@ -25,20 +26,27 @@ func (h *HandlerTimesAll) Handle(c echo.Context, messageEvent *slackevents.Messa
 	if isReplyMessage(messageEvent) {
 		return nil
 	}
+
+	if messageEvent.Channel == timesAllChannelID {
+		return nil // skip messages in times_all
+	}
+	channel, err := h.c.GetConversationInfo(messageEvent.Channel, false)
+	if err != nil {
+		return err
+	}
+	if !strings.HasPrefix(channel.Name, "巛_") {
+		return nil // skip messages in normal channel
+	}
+
 	user, err := h.c.GetUserInfo(messageEvent.User)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	if messageEvent.Channel == timesAllChannelID {
-		return nil // skip messages in times_all
 	}
 	msgOptList := []slack.MsgOption{
 		slack.MsgOptionUsername(user.Profile.DisplayName),
 		slack.MsgOptionIconURL(user.Profile.Image192),
 		slack.MsgOptionAttachments(messageEvent.Attachments...),
 	}
-	// bot による message の場合は text は投稿しない
-	// NOTE: 今後「おもしろメッセージ bot」みたいのが出てきた時にどうするか考える必要がある
 	if !user.IsBot {
 		msgOptList = append(msgOptList, slack.MsgOptionText(messageEvent.Text, false))
 	}
