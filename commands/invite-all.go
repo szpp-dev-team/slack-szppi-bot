@@ -1,6 +1,10 @@
 package commands
 
-import "github.com/slack-go/slack"
+import (
+	"log"
+
+	"github.com/slack-go/slack"
+)
 
 type CommandInviteAll struct {
 	slackClient *slack.Client
@@ -29,10 +33,11 @@ func (c *CommandInviteAll) Handle(slackCmd *slack.SlashCommand) error {
 	if err != nil {
 		return err
 	}
+	log.Println(existUserIDs)
 	for _, userID := range existUserIDs {
 		delete(userIDset, userID)
 	}
-	userIDs := make([]string, len(existUserIDs))
+	userIDs := make([]string, len(userIDset))
 	for userID := range userIDset {
 		userIDs = append(userIDs, userID)
 	}
