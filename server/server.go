@@ -19,6 +19,7 @@ func New(slackClient *slack.Client, customsearchService *customsearch.Service, s
 		commands.NewCommandOmikuji(slackClient),
 		commands.NewCommandImage(slackClient, customsearchService),
 		commands.NewCommandShowTimes(slackClient),
+		commands.NewCommandInviteAll(slackClient),
 	)
 	timesAllHandler := handlers.NewHandlerTimesAll(slackClient)
 	channelNotificatorHandler := handlers.NewHandlerNewChannelNotificator(slackClient)
