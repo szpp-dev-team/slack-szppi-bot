@@ -25,6 +25,9 @@ func (c *CommandInviteAll) Handle(slackCmd *slack.SlashCommand) error {
 	}
 	userIDset := make(map[string]struct{}, len(users))
 	for _, user := range users {
+		if user.IsBot {
+			continue
+		}
 		userIDset[user.ID] = struct{}{}
 	}
 	existUserIDs, _, err := c.slackClient.GetUsersInConversation(&slack.GetUsersInConversationParameters{
