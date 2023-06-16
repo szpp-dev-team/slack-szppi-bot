@@ -19,9 +19,22 @@ func (c *CommandInviteAll) Handle(slackCmd *slack.SlashCommand) error {
 	if err != nil {
 		return err
 	}
-	userIDs := make([]string, len(users))
-	for i, user := range users {
-		userIDs[i] = user.ID
+	userIDset := make(map[string]struct{}, len(users))
+	for _, user := range users {
+		userIDset[user.ID] = struct{}{}
+	}
+	existUserIDs, _, err := c.slackClient.GetUsersInConversation(&slack.GetUsersInConversationParameters{
+		ChannelID: slackCmd.ChannelID,
+	})
+	if err != nil {
+		return err
+	}
+	for _, userID := range existUserIDs {
+		delete(userIDset, userID)
+	}
+	userIDs := make([]string, len(existUserIDs))
+	for userID := range userIDset {
+		userIDs = append(userIDs, userID)
 	}
 	if _, err := c.slackClient.InviteUsersToConversation(slackCmd.ChannelID, userIDs...); err != nil {
 		return err
