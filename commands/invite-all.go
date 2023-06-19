@@ -2,6 +2,7 @@ package commands
 
 import (
 	"log"
+	"time"
 
 	"github.com/slack-go/slack"
 )
@@ -36,16 +37,15 @@ func (c *CommandInviteAll) Handle(slackCmd *slack.SlashCommand) error {
 	if err != nil {
 		return err
 	}
-	log.Println(existUserIDs)
 	for _, userID := range existUserIDs {
 		delete(userIDset, userID)
 	}
-	userIDs := make([]string, len(userIDset))
 	for userID := range userIDset {
-		userIDs = append(userIDs, userID)
+		if _, err := c.slackClient.InviteUsersToConversation(slackCmd.ChannelID, userID); err != nil {
+			log.Println("failed to invite user: ", userID)
+		}
+		time.Sleep(time.Second)
 	}
-	if _, err := c.slackClient.InviteUsersToConversation(slackCmd.ChannelID, userIDs...); err != nil {
-		return err
-	}
+
 	return nil
 }
